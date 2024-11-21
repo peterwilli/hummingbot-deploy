@@ -9,9 +9,11 @@ from functools import cmp_to_key
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional
+from frontend.pages.config.emeraldfund.utils import prepare_install
 
-from numpy import string_
+prepare_install("optuna", "optuna")
 import optuna
+from optuna.trial import FrozenTrial
 import streamlit as st
 from frontend.pages.config.emeraldfund.code_replace import code_replace
 from frontend.pages.config.emeraldfund.core.utils import (
@@ -19,9 +21,7 @@ from frontend.pages.config.emeraldfund.core.utils import (
 )
 from frontend.pages.config.emeraldfund.hyperrankrank import hyperrankrank
 from frontend.st_utils import get_backend_api_client
-from optuna.trial import FrozenTrial
 from plotly.basedatatypes import itertools
-from frontend.pages.config.emeraldfund.utils import prepare_install
 
 prepare_install("streamlit-sortables", "streamlit_sortables")
 from streamlit_sortables import sort_items
