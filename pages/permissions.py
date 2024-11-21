@@ -8,6 +8,7 @@ def main_page():
 def public_pages():
     return [
         Section("Config Generator", "🎛️"),
+        Page("frontend/pages/config/grid_strike/app.py", "Grid Strike", "🎳"),
         Page("frontend/pages/config/pmm_simple/app.py", "PMM Simple", "👨‍🏫"),
         Page("frontend/pages/config/pmm_dynamic/app.py", "PMM Dynamic", "👩‍🏫"),
         Page("frontend/pages/config/dman_maker_v2/app.py", "D-Man Maker V2", "🤖"),
@@ -25,6 +26,7 @@ def public_pages():
         Section("Community Pages", "👨‍👩‍👧‍👦"),
         Page("frontend/pages/data/token_spreads/app.py", "Token Spreads", "🧙"),
         Page("frontend/pages/data/tvl_vs_mcap/app.py", "TVL vs Market Cap", "🦉"),
+        Page("frontend/pages/performance/bot_performance/app.py", "Strategy Performance", "📈"),
     ]
 
 
