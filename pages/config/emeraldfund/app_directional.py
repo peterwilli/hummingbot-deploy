@@ -34,6 +34,7 @@ from frontend.visualization.backtesting_metrics import (
 from frontend.visualization.indicators import get_volume_trace
 from frontend.visualization.utils import add_traces_to_fig
 from frontend.visualization.signals import get_signal_traces
+from frontend.pages.config.emeraldfund.utils import prepare_install
 
 # Initialize the Streamlit page
 initialize_st_page(title="PMM Emerlad Fund", icon="💚")
@@ -70,11 +71,11 @@ if hasattr(processor, "get_parameters"):
         setattr(processor, k, param["current"])
 processed_candles = processor.process_candles(candles)
 
-
 def get_custom_candle_trace_additions(candles, placement: str = "overlay"):
     result = []
-
-    for col in candles.columns:
+    colors = ["blue", "green", "red", "purple", "orange", "cyan", "magenta", "yellow", "black", "gray"]
+    
+    for index, col in enumerate(candles.columns):
         key = f"line_{placement}"
         if col.startswith(key):
             result.append(
@@ -82,12 +83,11 @@ def get_custom_candle_trace_additions(candles, placement: str = "overlay"):
                     x=candles.index,
                     y=candles[col],
                     name=col[len(key) + 1 :],
-                    line=dict(color="blue"),
+                    line=dict(color=colors[index % len(colors)]),
                 )
             )
 
     return result
-
 
 with st.expander("Visualizing Indicators", expanded=True):
     fig = make_subplots(

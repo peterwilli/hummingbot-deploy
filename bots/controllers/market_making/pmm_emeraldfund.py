@@ -15,6 +15,21 @@ from hummingbot.strategy_v2.executors.position_executor.data_types import (
     PositionExecutorConfig,
 )
 
+def prepare_install(package_name: str, module_name: str):
+    import importlib.util
+
+    # Check if the module exists
+    if importlib.util.find_spec(module_name) is None:
+        # Install the module using pip
+        import subprocess
+        import sys
+
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+
+        # Reload the module
+        import importlib
+
+        importlib.reload(importlib.util)
 
 class PMMEmeraldFund(MarketMakingControllerConfigBase):
     controller_name = "pmm_emeraldfund"
@@ -111,7 +126,7 @@ class EmeraldFundPMMController(MarketMakingControllerBase):
                 )
             ]
         local_obj = {}
-        exec(self.config.processor_code, dict(ta=ta, pd=pd), local_obj)
+        exec(self.config.processor_code, dict(ta=ta, pd=pd, prepare_install=prepare_install), local_obj)
         self.processor = local_obj["SignalProcessor"]()
         if hasattr(self.processor, "get_parameters"):
             parameters = self.processor.get_parameters()

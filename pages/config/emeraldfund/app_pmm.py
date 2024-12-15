@@ -32,6 +32,7 @@ from frontend.visualization.backtesting_metrics import (
 )
 from frontend.visualization.indicators import get_volume_trace
 from frontend.visualization.utils import add_traces_to_fig
+from frontend.pages.config.emeraldfund.utils import prepare_install
 
 # Initialize the Streamlit page
 initialize_st_page(title="PMM Emerlad Fund", icon="💚")

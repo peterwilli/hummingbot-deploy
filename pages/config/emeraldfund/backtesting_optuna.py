@@ -9,9 +9,13 @@ from functools import cmp_to_key
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional
-from frontend.pages.config.emeraldfund.utils import prepare_install
 
+from frontend.pages.config.emeraldfund.utils import prepare_install
 prepare_install("optuna", "optuna")
+prepare_install("astor", "astor")
+prepare_install("tokenize", "tokenize")
+prepare_install("yapf", "yapf")
+
 import optuna
 from optuna.trial import FrozenTrial
 import streamlit as st
@@ -28,6 +32,7 @@ from streamlit_sortables import sort_items
 
 objective_to_name = {
     "net_pnl": "Profit",
+    "largest_loss_pct": "Largest loss",
     "max_drawdown_pct": "Max Drawdown",
     "speed": "Time in seconds",
 }
@@ -292,6 +297,9 @@ async def run_optimization_fn(
             lambda x, y: y.user_attrs["max_drawdown_pct"]
             - x.user_attrs["max_drawdown_pct"]
         ),
+        "largest_loss_pct": cmp_to_key(
+            lambda x, y: y.user_attrs["largest_loss_pct"] - x.user_attrs["largest_loss_pct"]
+        ),
         "speed": cmp_to_key(lambda x, y: x.user_attrs["speed"] - y.user_attrs["speed"]),
         "net_pnl": cmp_to_key(
             lambda x, y: y.user_attrs["net_pnl"] - x.user_attrs["net_pnl"]
@@ -457,18 +465,22 @@ def optuna_section(inputs, backend_api_client, processor):
         st.write(
             "Objectives give you a custom direction to which your strategy is to be optimized."
         )
-        c1, c2, c3 = st.columns(3)
+        c1, c2, c3, c4 = st.columns(4)
         with c1:
             objective_net_pnl = st.checkbox(
                 objective_to_name["net_pnl"], value=True, key="EMOptunaObjectiveNetPNL"
             )
         with c2:
+            objective_largest_loss = st.checkbox(
+                objective_to_name["largest_loss_pct"], value=True, key="EMOptunaObjectiveLargestLoss"
+            )
+        with c3:
             objective_max_drawdown = st.checkbox(
                 objective_to_name["max_drawdown_pct"],
                 value=True,
                 key="EMOptunaObjectiveMaxDrawdown",
             )
-        with c3:
+        with c4:
             objective_speed = st.checkbox(
                 objective_to_name["speed"], value=False, key="EMOptunaObjectiveSpeed"
             )
@@ -476,6 +488,8 @@ def optuna_section(inputs, backend_api_client, processor):
         objectives = []
         if objective_net_pnl:
             objectives.append("net_pnl")
+        if objective_largest_loss:
+            objectives.append("largest_loss_pct")
         if objective_max_drawdown:
             objectives.append("max_drawdown_pct")
         if objective_speed:

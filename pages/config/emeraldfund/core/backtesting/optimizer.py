@@ -150,6 +150,7 @@ class StrategyOptimizer:
         objectives_to_direction = {
             "speed": "minimize",
             "max_drawdown_pct": "maximize",
+            "largest_loss_pct": "maximize",
             "net_pnl": "maximize",
         }
         return optuna.create_study(
@@ -264,14 +265,18 @@ class StrategyOptimizer:
 
             result = []
             net_pnl = sum(net_pnl_list) / len(net_pnl_list)
-            max_drawdown_pct = max(max_drawdown_pct_list) / len(max_drawdown_pct_list)
+            max_drawdown_pct = sum(max_drawdown_pct_list) / len(max_drawdown_pct_list)
+            largest_loss_pct = min(net_pnl_list)
             speed = end - start
             trial.set_user_attr("net_pnl", net_pnl)
             trial.set_user_attr("max_drawdown_pct", max_drawdown_pct)
+            trial.set_user_attr("largest_loss_pct", largest_loss_pct)
             trial.set_user_attr("speed", speed)
             for objective in self._objectives:
                 if objective == "net_pnl":
                     result.append(net_pnl)
+                elif objective == "largest_loss_pct":
+                    result.append(largest_loss_pct)
                 elif objective == "max_drawdown_pct":
                     result.append(max_drawdown_pct)
                 elif objective == "speed":
