@@ -114,6 +114,7 @@ async def run_optimization_fn(
     amount_of_trials: int,
     date_ranges: List[List[int]],
     add_current_configuration: bool,
+    backtesting_resolution: str
 ):
     import sys
 
@@ -264,7 +265,7 @@ async def run_optimization_fn(
 
             # Return the configuration encapsulated in BacktestingConfig
             return BacktestingConfig(
-                config=config, resolution=interval, date_ranges=date_ranges
+                config=config, resolution=backtesting_resolution, date_ranges=date_ranges
             )
 
     config_generator = EmeraldFundConfigGenerator(
@@ -574,6 +575,7 @@ def optuna_section(inputs, backend_api_client, processor):
                 int(amount_of_trials),
                 sections,
                 add_current_configuration,
+                backtesting_resolution
             )
         )
     if st.session_state.get("EMBestTrials", None) is not None:
