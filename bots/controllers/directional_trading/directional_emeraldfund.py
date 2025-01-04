@@ -1,16 +1,19 @@
 from typing import List
 
-import pandas_ta as ta  # noqa: F401
 import pandas as pd
-
-from pydantic import Field, validator
-
+import pandas_ta as ta  # noqa: F401
 from hummingbot.client.config.config_data_types import ClientFieldData
+from hummingbot.core.data_type.common import OrderType
 from hummingbot.data_feed.candles_feed.data_types import CandlesConfig
 from hummingbot.strategy_v2.controllers.directional_trading_controller_base import (
     DirectionalTradingControllerBase,
     DirectionalTradingControllerConfigBase,
 )
+from hummingbot.strategy_v2.executors.position_executor.data_types import (
+    TripleBarrierConfig,
+)
+import numpy as np
+from pydantic import Field, validator
 
 
 class DirectionalEmeraldFundControllerConfig(DirectionalTradingControllerConfigBase):
@@ -51,6 +54,44 @@ class DirectionalEmeraldFundControllerConfig(DirectionalTradingControllerConfigB
             prompt_on_new=False,
         ),
     )
+    open_order_type: OrderType = Field(
+        default="MARKET",
+        client_data=ClientFieldData(
+            prompt=lambda mi: "Enter the order type for opening a position (LIMIT/MARKET): ",
+            prompt_on_new=True,
+        ),
+    )
+
+    @validator("open_order_type", pre=True, allow_reuse=True, always=True)
+    def validate_order_type(cls, v) -> OrderType:
+        if isinstance(v, OrderType):
+            return v
+        elif v is None:
+            return OrderType.MARKET
+        elif isinstance(v, str):
+            if v.upper() in OrderType.__members__:
+                return OrderType[v.upper()]
+        elif isinstance(v, int):
+            try:
+                return OrderType(v)
+            except ValueError:
+                pass
+        raise ValueError(
+            f"Invalid order type: {v}. Valid options are: {', '.join(OrderType.__members__)}"
+        )
+
+    @property
+    def triple_barrier_config(self) -> TripleBarrierConfig:
+        return TripleBarrierConfig(
+            stop_loss=self.stop_loss,
+            take_profit=self.take_profit,
+            time_limit=self.time_limit,
+            trailing_stop=self.trailing_stop,
+            open_order_type=self.open_order_type,
+            take_profit_order_type=self.take_profit_order_type,
+            stop_loss_order_type=OrderType.MARKET,  # Defaulting to MARKET as per requirement
+            time_limit_order_type=OrderType.MARKET,  # Defaulting to MARKET as per requirement
+        )
 
     @validator("candles_connector", pre=True, always=True)
     def set_candles_connector(cls, v, values):
@@ -63,6 +104,7 @@ class DirectionalEmeraldFundControllerConfig(DirectionalTradingControllerConfigB
         if v is None or v == "":
             return values.get("trading_pair")
         return v
+
 
 def prepare_install(package_name: str, module_name: str):
     import importlib.util
@@ -80,6 +122,7 @@ def prepare_install(package_name: str, module_name: str):
 
         importlib.reload(importlib.util)
 
+
 class DirectionalEmeraldFundController(DirectionalTradingControllerBase):
     def __init__(self, config: DirectionalEmeraldFundControllerConfig, *args, **kwargs):
         self.config = config
@@ -95,7 +138,11 @@ class DirectionalEmeraldFundController(DirectionalTradingControllerBase):
             ]
 
         local_obj = {}
-        exec(self.config.processor_code, dict(ta=ta, pd=pd, prepare_install=prepare_install), local_obj)
+        exec(
+            self.config.processor_code,
+            dict(ta=ta, pd=pd, np=np, prepare_install=prepare_install),
+            local_obj,
+        )
         self.processor = local_obj["SignalProcessor"]()
         if hasattr(self.processor, "get_parameters"):
             parameters = self.processor.get_parameters()

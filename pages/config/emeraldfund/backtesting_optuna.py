@@ -187,6 +187,25 @@ async def run_optimization_fn(
                     param["current"] = trial.suggest_float(
                         k, param_min, param_max, step=step
                     )
+                elif kt is list:
+                    cur_len = len(param['current'])
+                    if cur_len > 0:
+                        first_type = type(param['current'][0])
+                        if first_type is int:
+                            param_max = param["max"]
+                            param_min = param["min"]
+                            param["current"] = []
+                            for i in range(cur_len):
+                                param["current"].append(trial.suggest_int(f"{k}_{i}", param_min, param_max))
+                        elif first_type is float:
+                            param_max = param["max"]
+                            param_min = param["min"]
+                            step = None
+                            if "step" in param:
+                                step = param["step"]
+                            param["current"] = []
+                            for i in range(cur_len):
+                                param["current"].append(trial.suggest_float(f"{k}_{i}", param_min, param_max, step=step))
                 elif kt is str:
                     param["current"] = trial.suggest_categorical(k, param["choices"])
                 else:

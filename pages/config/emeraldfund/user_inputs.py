@@ -9,6 +9,7 @@ from frontend.components.market_making_general_inputs import (
 from frontend.components.risk_management import get_risk_management_inputs
 
 from frontend.pages.config.emeraldfund.utils import prepare_install
+from hummingbot.connector.connector_base import OrderType
 
 prepare_install("streamlit_code_editor", "code_editor")
 
@@ -33,12 +34,25 @@ def user_inputs(controller_type: str):
             interval,
         ) = get_directional_trading_general_inputs()
 
+        with st.expander("Emerald Fund Settings", expanded=True):
+            c1, c2 = st.columns(2)
+            with c1:
+                max_records = st.number_input(
+                    "Enter the maximum amount of candles to process",
+                    value=default_config.get("max_records", 100),
+                )
+            with c2:
+                order_types = [OrderType.LIMIT, OrderType.LIMIT_MAKER, OrderType.MARKET]
+                open_order_type = OrderType(default_config.get("open_order_type", 1))
+                open_order_type = st.selectbox(
+                    "Open Order Type",
+                    order_types,
+                    index=order_types.index(open_order_type),
+                    help="Open order type (market opens market orders and limit (or limit maker) opens limit orders, handy for exchanges that offer fee rebates such as Injective Helix and DYDX)",
+                )
+
         sl, tp, time_limit, ts_ap, ts_delta, take_profit_order_type = (
             get_risk_management_inputs()
-        )
-        max_records = st.number_input(
-            "Enter the maximum amount of candles to process",
-            value=default_config.get("max_records", 100),
         )
 
         processor_code = default_config.get(
@@ -73,6 +87,7 @@ def user_inputs(controller_type: str):
             "candles_connector": candles_connector_name,
             "candles_trading_pair": candles_trading_pair,
             "interval": interval,
+            "open_order_type": open_order_type.value,
             "stop_loss": sl,
             "take_profit": tp,
             "time_limit": time_limit,

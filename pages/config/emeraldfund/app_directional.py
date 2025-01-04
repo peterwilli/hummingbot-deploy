@@ -15,17 +15,13 @@ from frontend.components.save_config import render_save_config
 
 # Import submodules
 from frontend.components.backtesting import backtesting_section
-from frontend.pages.config.emeraldfund.utils import get_market_making_traces
 from frontend.pages.config.emeraldfund.user_inputs import user_inputs
-from frontend.pages.config.utils import get_max_records, get_candles
+from frontend.pages.config.utils import get_candles
 from frontend.st_utils import initialize_st_page
 from frontend.st_utils import initialize_st_page, get_backend_api_client
 from frontend.visualization import theme
 from frontend.visualization.backtesting import create_backtesting_figure
 from frontend.visualization.candles import get_candlestick_trace
-from frontend.visualization.executors_distribution import (
-    create_executors_distribution_traces,
-)
 from frontend.visualization.backtesting_metrics import (
     render_backtesting_metrics,
     render_close_types,
@@ -34,7 +30,6 @@ from frontend.visualization.backtesting_metrics import (
 from frontend.visualization.indicators import get_volume_trace
 from frontend.visualization.utils import add_traces_to_fig
 from frontend.visualization.signals import get_signal_traces
-from frontend.pages.config.emeraldfund.utils import prepare_install
 
 # Initialize the Streamlit page
 initialize_st_page(title="PMM Emerlad Fund", icon="💚")
@@ -45,6 +40,7 @@ st.text(
     "This tool will let you create a config for PMM Emerald Fund, backtest and upload it to the Backend API."
 )
 get_default_config_loader("directional_emeraldfund")
+
 # Get user inputs
 inputs = user_inputs("directional")
 st.session_state["default_config"].update(inputs)
@@ -52,6 +48,7 @@ st.write("### Visualize")
 days_to_visualize = st.number_input(
     "Days to Visualize", min_value=1, max_value=365, value=3
 )
+
 # Load candle data
 candles = get_candles(
     connector_name=inputs["candles_connector"],
@@ -59,10 +56,12 @@ candles = get_candles(
     interval=inputs["interval"],
     days=days_to_visualize,
 )
+
 try:
     exec(inputs["processor_code"])
 except Exception:
     st.error(f"Error running the processing code:\n\n```{traceback.format_exc()}```")
+
 processor = SignalProcessor()
 if hasattr(processor, "get_parameters"):
     parameters = processor.get_parameters()
@@ -71,10 +70,21 @@ if hasattr(processor, "get_parameters"):
         setattr(processor, k, param["current"])
 processed_candles = processor.process_candles(candles)
 
+
 def get_custom_candle_trace_additions(candles, placement: str = "overlay"):
     result = []
-    colors = ["blue", "green", "red", "purple", "orange", "cyan", "magenta", "yellow", "black", "gray"]
-    
+    colors = [
+        "blue",
+        "green",
+        "red",
+        "purple",
+        "orange",
+        "cyan",
+        "magenta",
+        "yellow",
+        "gray",
+    ]
+
     for index, col in enumerate(candles.columns):
         key = f"line_{placement}"
         if col.startswith(key):
@@ -88,6 +98,7 @@ def get_custom_candle_trace_additions(candles, placement: str = "overlay"):
             )
 
     return result
+
 
 with st.expander("Visualizing Indicators", expanded=True):
     fig = make_subplots(
@@ -104,9 +115,14 @@ with st.expander("Visualizing Indicators", expanded=True):
     )
 
     add_traces_to_fig(fig, [get_candlestick_trace(candles)], row=1, col=1)
-    add_traces_to_fig(fig, get_custom_candle_trace_additions(candles), row=1, col=1)
     add_traces_to_fig(
-        fig, get_custom_candle_trace_additions(candles, "separate"), row=2, col=1
+        fig, get_custom_candle_trace_additions(processed_candles), row=1, col=1
+    )
+    add_traces_to_fig(
+        fig,
+        get_custom_candle_trace_additions(processed_candles, "separate"),
+        row=2,
+        col=1,
     )
     add_traces_to_fig(fig, [get_volume_trace(candles)], row=3, col=1)
     add_traces_to_fig(
