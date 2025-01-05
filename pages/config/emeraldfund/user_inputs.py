@@ -8,9 +8,9 @@ from frontend.components.market_making_general_inputs import (
 )
 from frontend.components.risk_management import get_risk_management_inputs
 
+from frontend.pages.config.emeraldfund.ui_utils import render_examples
 from frontend.pages.config.emeraldfund.utils import prepare_install
 from hummingbot.connector.connector_base import OrderType
-import ui_utils
 
 prepare_install("streamlit_code_editor", "code_editor")
 
@@ -35,7 +35,7 @@ def user_inputs(controller_type: str):
             interval,
         ) = get_directional_trading_general_inputs()
 
-        ui_utils.render_examples("directional", default_config)
+        render_examples("directional", default_config)
 
         with st.expander("Emerald Fund Settings", expanded=True):
             c1, c2 = st.columns(2)

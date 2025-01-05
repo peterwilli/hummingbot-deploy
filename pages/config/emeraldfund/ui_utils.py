@@ -1,10 +1,10 @@
-import utils
 import streamlit as st
+from frontend.pages.config.emeraldfund.utils import get_examples
 
 
 def render_examples(example_type, inputs):
     with st.expander("Examples", expanded=False):
-        examples = utils.get_examples(example_type)
+        examples = get_examples(example_type)
         current_example = st.selectbox(
             "Select an example", examples, format_func=lambda x: x[0]
         )

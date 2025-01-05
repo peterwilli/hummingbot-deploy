@@ -39,8 +39,8 @@ st.text(
     "This tool will let you create a config for Directional Emerald Fund, backtest and upload it to the Backend API."
 )
 
-get_default_config_loader("directional_emeraldfund")
 inputs = user_inputs("directional")
+get_default_config_loader("directional_emeraldfund")
 st.session_state["default_config"].update(inputs)
 
 # Get user inputs
