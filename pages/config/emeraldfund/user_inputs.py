@@ -10,6 +10,7 @@ from frontend.components.risk_management import get_risk_management_inputs
 
 from frontend.pages.config.emeraldfund.utils import prepare_install
 from hummingbot.connector.connector_base import OrderType
+import ui_utils
 
 prepare_install("streamlit_code_editor", "code_editor")
 
@@ -33,6 +34,8 @@ def user_inputs(controller_type: str):
             candles_trading_pair,
             interval,
         ) = get_directional_trading_general_inputs()
+
+        ui_utils.render_examples("directional", default_config)
 
         with st.expander("Emerald Fund Settings", expanded=True):
             c1, c2 = st.columns(2)
@@ -65,7 +68,7 @@ def user_inputs(controller_type: str):
                     return candles
         """).strip(),
         )
-        ai_input()
+        # ai_input()
         processor_code_editor = code_editor(processor_code)
         # Somehow code_editor returns an empty string if default value is used
         if processor_code_editor["text"] == "":

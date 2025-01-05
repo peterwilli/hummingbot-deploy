@@ -6,11 +6,10 @@ from plotly.subplots import make_subplots
 import traceback
 import pandas_ta as ta  # noqa: F401
 import pandas as pd
-
+import numpy as np
 from backend.services.backend_api_client import BackendAPIClient
 from CONFIG import BACKEND_API_HOST, BACKEND_API_PORT
 from frontend.components.config_loader import get_default_config_loader
-from frontend.components.executors_distribution import get_executors_distribution_inputs
 from frontend.components.save_config import render_save_config
 
 # Import submodules
@@ -37,13 +36,14 @@ backend_api_client = get_backend_api_client()
 
 # Page content
 st.text(
-    "This tool will let you create a config for PMM Emerald Fund, backtest and upload it to the Backend API."
+    "This tool will let you create a config for Directional Emerald Fund, backtest and upload it to the Backend API."
 )
-get_default_config_loader("directional_emeraldfund")
 
-# Get user inputs
+get_default_config_loader("directional_emeraldfund")
 inputs = user_inputs("directional")
 st.session_state["default_config"].update(inputs)
+
+# Get user inputs
 st.write("### Visualize")
 days_to_visualize = st.number_input(
     "Days to Visualize", min_value=1, max_value=365, value=3
