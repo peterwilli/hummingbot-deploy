@@ -1,3 +1,10 @@
+# Shutdown notice
+
+I'm really sorry, everyone, but I no longer have the time to keep this legacy package up to date given that the recode of Emerald Fund is in full force!
+If you want to finance my work and speed things up please join my patreon where I also post live info: https://www.patreon.com/c/emerald_show
+
+The alpha version of Emerald Fund 2 will be public because of this shutdown, so if you're interested in joining the public alpha testing phase, you can join me at Discord: https://discord.gg/dCjH8zZXuM
+
 # hummingbot-deploy
 
 Welcome to the Hummingbot Deploy project. This guide will walk you through the steps to deploy multiple trading bots using a centralized dashboard and a service backend.
